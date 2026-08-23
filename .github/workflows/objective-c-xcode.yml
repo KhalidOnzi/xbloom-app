@@ -1,0 +1,63 @@
+name: Build Unsigned IPA (for SideStore)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:   # lets you trigger it manually from the Actions tab too
+
+jobs:
+  build:
+    name: Build unsigned IPA
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --- 1. Detect the project/workspace and default scheme ---
+      - name: Set Default Scheme
+        run: |
+          scheme_list=$(xcodebuild -list -json | tr -d "\n")
+          default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
+          echo $default | cat >default
+          echo Using default scheme: $default
+
+      # --- 2. Build for a real device, but with code signing turned off ---
+      # SideStore signs the app itself with your free Apple ID, so we don't
+      # need a certificate, provisioning profile, or any secrets here.
+      - name: Build for iOS device (unsigned)
+        env:
+          scheme: ${{ 'default' }}
+        run: |
+          if [ $scheme = default ]; then scheme=$(cat default); fi
+          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
+          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
+
+          xcodebuild clean build \
+            -scheme "$scheme" \
+            -"$filetype_parameter" "$file_to_build" \
+            -destination "generic/platform=iOS" \
+            -derivedDataPath $RUNNER_TEMP/build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            EXPAND_BUILD_SETTING_IN_PLIST_FILE=NO
+
+      # --- 3. Package the built .app into an unsigned .ipa ---
+      # An .ipa is just a zip with a specific folder structure: Payload/YourApp.app
+      - name: Package into IPA
+        run: |
+          APP_PATH=$(find $RUNNER_TEMP/build/Build/Products -name "*.app" -maxdepth 2 | head -n 1)
+          echo "Found app at: $APP_PATH"
+          mkdir -p $RUNNER_TEMP/Payload
+          cp -R "$APP_PATH" $RUNNER_TEMP/Payload/
+          cd $RUNNER_TEMP
+          zip -r unsigned.ipa Payload
+
+      # --- 4. Upload the .ipa as a downloadable artifact ---
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-unsigned-ipa
+          path: ${{ runner.temp }}/unsigned.ipa
