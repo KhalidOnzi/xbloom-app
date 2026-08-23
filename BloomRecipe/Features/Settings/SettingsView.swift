@@ -11,13 +11,13 @@ struct SettingsView: View {
                     .font(.system(.largeTitle, design: .serif).weight(.semibold))
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("OPENAI")
+                    Text("GEMINI")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(BloomTheme.muted)
-                    SecureField("API key", text: $model.openAIKey)
+                    SecureField("API key", text: $model.geminiKey)
                         .textContentType(.password)
                         .textInputAutocapitalization(.never)
-                    Text("Used on this iPhone to read bag photos and refine recipes. The key stays in the Keychain.")
+                    Text("Used on this iPhone to read bag photos and refine recipes. Get a key at aistudio.google.com. It stays in the Keychain.")
                         .font(.footnote)
                         .foregroundStyle(BloomTheme.muted)
                 }

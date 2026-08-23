@@ -5,6 +5,7 @@ enum KeychainStore {
     private static let service = "com.bloomrecipe.app"
 
     enum Key: String {
+        case geminiKey = "gemini.apiKey"
         case openAIKey = "openai.apiKey"
         case xbloomEmail = "xbloom.email"
         case xbloomPassword = "xbloom.password"

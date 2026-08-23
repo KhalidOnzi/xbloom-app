@@ -27,8 +27,8 @@ final class AppModel {
     var infoMessage: String?
     var lastPushAction: String?
 
-    var openAIKey: String {
-        didSet { KeychainStore.set(openAIKey, for: .openAIKey) }
+    var geminiKey: String {
+        didSet { KeychainStore.set(geminiKey, for: .geminiKey) }
     }
 
     var xbloomEmail: String {
@@ -47,8 +47,8 @@ final class AppModel {
         didSet { Preferences.defaultRatio = defaultRatio }
     }
 
-    var hasOpenAIKey: Bool {
-        !openAIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    var hasGeminiKey: Bool {
+        !geminiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var hasXBloomCredentials: Bool {
@@ -67,7 +67,9 @@ final class AppModel {
     }
 
     init() {
-        openAIKey = KeychainStore.string(for: .openAIKey) ?? ""
+        geminiKey = KeychainStore.string(for: .geminiKey)
+            ?? KeychainStore.string(for: .openAIKey)
+            ?? ""
         xbloomEmail = KeychainStore.string(for: .xbloomEmail) ?? ""
         xbloomPassword = KeychainStore.string(for: .xbloomPassword) ?? ""
         defaultDoseG = Preferences.defaultDoseG
@@ -106,14 +108,14 @@ final class AppModel {
         defer { isAnalyzing = false }
 
         do {
-            if hasOpenAIKey {
+            if hasGeminiKey {
                 profile = try await VisionClient.analyze(
                     frontJPEG: frontJPEG,
                     backJPEG: backJPEG,
-                    apiKey: openAIKey
+                    apiKey: geminiKey
                 )
             } else {
-                errorMessage = "Add an OpenAI key in Settings, or fill in the bag details by hand."
+                errorMessage = "Add a Gemini key in Settings, or fill in the bag details by hand."
             }
             path.append(.profile)
         } catch {
@@ -132,12 +134,12 @@ final class AppModel {
                 doseG: defaultDoseG,
                 ratio: defaultRatio
             )
-            if refineWithModel, hasOpenAIKey {
+            if refineWithModel, hasGeminiKey {
                 do {
                     next = try await RecipeEngine.refine(
                         recipe: next,
                         profile: profile,
-                        apiKey: openAIKey
+                        apiKey: geminiKey
                     )
                 } catch {
                     next.rationale += " (Model refine skipped: \(error.localizedDescription))"
