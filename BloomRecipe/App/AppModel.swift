@@ -204,7 +204,7 @@ final class AppModel {
                 ? "Updated in your xBloom app."
                 : "Created in your xBloom app."
 
-            let record = existing ?? (try SavedBrew.make(profile: profile, recipe: recipe))
+            let record = try existing ?? SavedBrew.make(profile: profile, recipe: recipe)
             if existing != nil {
                 try record.update(profile: profile, recipe: recipe)
             }
