@@ -68,7 +68,8 @@ private struct ProfileDTO: Decodable {
 }
 
 enum GeminiClient {
-    static let model = "gemini-2.0-flash"
+    /// Multimodal models that accept photos. Try the current vision default first.
+    static let models = ["gemini-3.6-flash", "gemini-2.5-flash"]
 
     enum ClientError: LocalizedError {
         case missingAPIKey
@@ -101,15 +102,16 @@ enum GeminiClient {
             throw ClientError.missingAPIKey
         }
 
-        var parts: [[String: Any]] = [["text": prompt]]
+        var parts: [[String: Any]] = []
         for image in images {
             parts.append([
-                "inline_data": [
-                    "mime_type": "image/jpeg",
+                "inlineData": [
+                    "mimeType": "image/jpeg",
                     "data": image.base64EncodedString()
                 ]
             ])
         }
+        parts.append(["text": prompt])
 
         var body: [String: Any] = [
             "contents": [
@@ -120,7 +122,8 @@ enum GeminiClient {
             ],
             "generationConfig": [
                 "temperature": 0.2,
-                "responseMimeType": "application/json"
+                "responseMimeType": "application/json",
+                "mediaResolution": "MEDIA_RESOLUTION_HIGH"
             ]
         ]
         if let system, !system.isEmpty {
@@ -129,6 +132,22 @@ enum GeminiClient {
             ]
         }
 
+        var lastError: Error = ClientError.invalidResponse
+        for model in models {
+            do {
+                return try await post(model: model, body: body, apiKey: apiKey)
+            } catch let error as ClientError {
+                lastError = error
+                if case .http(let code, _) = error, code == 404 {
+                    continue
+                }
+                throw error
+            }
+        }
+        throw lastError
+    }
+
+    private static func post(model: String, body: [String: Any], apiKey: String) async throws -> String {
         var request = URLRequest(
             url: URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(model):generateContent")!
         )
@@ -145,7 +164,11 @@ enum GeminiClient {
         }
 
         let decoded = try JSONDecoder().decode(GenerateResponse.self, from: data)
-        guard let text = decoded.candidates.first?.content.parts.first?.text, !text.isEmpty else {
+        let text = decoded.candidates.first?.content.parts
+            .compactMap(\.text)
+            .joined()
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !text.isEmpty else {
             throw ClientError.invalidResponse
         }
         return text
