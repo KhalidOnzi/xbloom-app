@@ -68,8 +68,8 @@ private struct ProfileDTO: Decodable {
 }
 
 enum GeminiClient {
-    /// Multimodal models that accept photos. Try the current vision default first.
-    static let models = ["gemini-3.6-flash", "gemini-2.5-flash"]
+    /// Current Gemini models that accept image input. 2.5 is skipped — it failed for bag photos.
+    static let models = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash"]
 
     enum ClientError: LocalizedError {
         case missingAPIKey
@@ -105,8 +105,8 @@ enum GeminiClient {
         var parts: [[String: Any]] = []
         for image in images {
             parts.append([
-                "inlineData": [
-                    "mimeType": "image/jpeg",
+                "inline_data": [
+                    "mime_type": "image/jpeg",
                     "data": image.base64EncodedString()
                 ]
             ])
@@ -116,14 +116,12 @@ enum GeminiClient {
         var body: [String: Any] = [
             "contents": [
                 [
-                    "role": "user",
                     "parts": parts
                 ]
             ],
             "generationConfig": [
                 "temperature": 0.2,
-                "responseMimeType": "application/json",
-                "mediaResolution": "MEDIA_RESOLUTION_HIGH"
+                "responseMimeType": "application/json"
             ]
         ]
         if let system, !system.isEmpty {
@@ -138,7 +136,7 @@ enum GeminiClient {
                 return try await post(model: model, body: body, apiKey: apiKey)
             } catch let error as ClientError {
                 lastError = error
-                if case .http(let code, _) = error, code == 404 {
+                if case .http(let code, _) = error, (400...404).contains(code) {
                     continue
                 }
                 throw error
