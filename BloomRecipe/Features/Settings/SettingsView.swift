@@ -11,13 +11,14 @@ struct SettingsView: View {
                     .font(.system(.largeTitle, design: .serif).weight(.semibold))
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("GEMINI")
+                    Text("BLOOMRECIPE SERVER")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(BloomTheme.muted)
-                    SecureField("API key", text: $model.geminiKey)
-                        .textContentType(.password)
+                    TextField("http://192.168.1.10:8000", text: $model.serverURL)
                         .textInputAutocapitalization(.never)
-                    Text("Used on this iPhone to read bag photos and refine recipes. Get a key at aistudio.google.com. It stays in the Keychain.")
+                        .autocorrectionDisabled()
+                        .keyboardType(.URL)
+                    Text("This PC runs FastAPI + Ollama. Bag photos use llama3.2-vision. Recipe text uses llama3.2. Enter your computer’s LAN IP so the iPhone can reach it.")
                         .font(.footnote)
                         .foregroundStyle(BloomTheme.muted)
                 }
@@ -77,7 +78,7 @@ struct SettingsView: View {
                     Text("UNOFFICIAL CONNECTION")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(BloomTheme.muted)
-                    Text("xBloom does not offer a public recipe API. BloomRecipe signs into your own account using the community-published cloud protocol so a recipe can appear in the official app. That connection can break if xBloom changes their servers. BloomRecipe never starts a brew and never talks to the machine over Bluetooth.")
+                    Text("The iPhone talks only to your FastAPI server. That server signs into your xBloom account and creates the recipe in the official app. It never starts a brew.")
                         .font(.footnote)
                         .foregroundStyle(BloomTheme.muted)
                 }

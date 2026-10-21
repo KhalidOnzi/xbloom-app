@@ -20,6 +20,7 @@
 		A1000000000000000000000B /* RecipeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000B /* RecipeEngine.swift */; };
 		A1000000000000000000000C /* VisionClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* VisionClient.swift */; };
 		A1000000000000000000000D /* XBloomCloudClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* XBloomCloudClient.swift */; };
+		A10000000000000000000019 /* BloomAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000019 /* BloomAPIClient.swift */; };
 		A1000000000000000000000E /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* CameraPicker.swift */; };
 		A1000000000000000000000F /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* CaptureView.swift */; };
 		A10000000000000000000010 /* AnalyzeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* AnalyzeView.swift */; };
@@ -55,6 +56,7 @@
 		B1000000000000000000000B /* RecipeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeEngine.swift; sourceTree = "<group>"; };
 		B1000000000000000000000C /* VisionClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionClient.swift; sourceTree = "<group>"; };
 		B1000000000000000000000D /* XBloomCloudClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XBloomCloudClient.swift; sourceTree = "<group>"; };
+		B10000000000000000000019 /* BloomAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloomAPIClient.swift; sourceTree = "<group>"; };
 		B1000000000000000000000E /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 		B1000000000000000000000F /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
 		B10000000000000000000010 /* AnalyzeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzeView.swift; sourceTree = "<group>"; };
@@ -162,6 +164,7 @@
 				B1000000000000000000000B /* RecipeEngine.swift */,
 				B1000000000000000000000C /* VisionClient.swift */,
 				B1000000000000000000000D /* XBloomCloudClient.swift */,
+				B10000000000000000000019 /* BloomAPIClient.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -332,6 +335,7 @@
 				A1000000000000000000000B /* RecipeEngine.swift in Sources */,
 				A1000000000000000000000C /* VisionClient.swift in Sources */,
 				A1000000000000000000000D /* XBloomCloudClient.swift in Sources */,
+				A10000000000000000000019 /* BloomAPIClient.swift in Sources */,
 				A1000000000000000000000E /* CameraPicker.swift in Sources */,
 				A1000000000000000000000F /* CaptureView.swift in Sources */,
 				A10000000000000000000010 /* AnalyzeView.swift in Sources */,
@@ -420,6 +424,8 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				INFOPLIST_KEY_NSCameraUsageDescription = "BloomRecipe photographs coffee bags to read the label and build a brew recipe.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "BloomRecipe can import a coffee-bag photo from your library.";
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -454,6 +460,8 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				INFOPLIST_KEY_NSCameraUsageDescription = "BloomRecipe photographs coffee bags to read the label and build a brew recipe.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "BloomRecipe can import a coffee-bag photo from your library.";
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

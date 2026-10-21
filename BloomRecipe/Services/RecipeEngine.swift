@@ -24,11 +24,9 @@ enum RecipeEngine {
 
     static func refine(
         recipe: BloomBrewRecipe,
-        profile: CoffeeProfile,
-        apiKey: String
+        profile: CoffeeProfile
     ) async throws -> BloomBrewRecipe {
-        let prompt = refinePrompt(profile: profile, recipe: recipe)
-        let raw = try await GeminiClient.completeJSON(prompt: prompt, apiKey: apiKey)
+        let raw = try await BloomAPIClient.refine(profile: profile, recipe: recipe)
         let patch = try decodeRefinePatch(from: raw)
         var next = recipe
         if let grind = patch.grind { next.grind = grind }

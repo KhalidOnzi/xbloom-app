@@ -3,6 +3,12 @@ import Foundation
 enum Preferences {
     private static let doseKey = "defaultDoseG"
     private static let ratioKey = "defaultRatio"
+    private static let serverKey = "serverURL"
+
+    static var serverURL: String {
+        get { UserDefaults.standard.string(forKey: serverKey) ?? "http://127.0.0.1:8000" }
+        set { UserDefaults.standard.set(newValue.trimmingCharacters(in: .whitespacesAndNewlines), forKey: serverKey) }
+    }
 
     static var defaultDoseG: Double {
         get {

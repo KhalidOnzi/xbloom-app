@@ -27,8 +27,8 @@ final class AppModel {
     var infoMessage: String?
     var lastPushAction: String?
 
-    var geminiKey: String {
-        didSet { KeychainStore.set(geminiKey, for: .geminiKey) }
+    var serverURL: String {
+        didSet { Preferences.serverURL = serverURL }
     }
 
     var xbloomEmail: String {
@@ -47,8 +47,8 @@ final class AppModel {
         didSet { Preferences.defaultRatio = defaultRatio }
     }
 
-    var hasGeminiKey: Bool {
-        !geminiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    var hasServerURL: Bool {
+        !serverURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var hasXBloomCredentials: Bool {
@@ -67,9 +67,7 @@ final class AppModel {
     }
 
     init() {
-        geminiKey = KeychainStore.string(for: .geminiKey)
-            ?? KeychainStore.string(for: .openAIKey)
-            ?? ""
+        serverURL = Preferences.serverURL
         xbloomEmail = KeychainStore.string(for: .xbloomEmail) ?? ""
         xbloomPassword = KeychainStore.string(for: .xbloomPassword) ?? ""
         defaultDoseG = Preferences.defaultDoseG
@@ -108,14 +106,13 @@ final class AppModel {
         defer { isAnalyzing = false }
 
         do {
-            if hasGeminiKey {
+            if hasServerURL {
                 profile = try await VisionClient.analyze(
                     frontJPEG: frontJPEG,
-                    backJPEG: backJPEG,
-                    apiKey: geminiKey
+                    backJPEG: backJPEG
                 )
             } else {
-                errorMessage = "Add a Gemini key in Settings, or fill in the bag details by hand."
+                errorMessage = "Add the FastAPI server URL in Settings, or fill in the bag details by hand."
             }
             path.append(.profile)
         } catch {
@@ -134,12 +131,11 @@ final class AppModel {
                 doseG: defaultDoseG,
                 ratio: defaultRatio
             )
-            if refineWithModel, hasGeminiKey {
+            if refineWithModel, hasServerURL {
                 do {
                     next = try await RecipeEngine.refine(
                         recipe: next,
-                        profile: profile,
-                        apiKey: geminiKey
+                        profile: profile
                     )
                 } catch {
                     next.rationale += " (Model refine skipped: \(error.localizedDescription))"
@@ -174,7 +170,7 @@ final class AppModel {
         isSigningIn = true
         defer { isSigningIn = false }
         do {
-            let session = try await XBloomCloudClient.login(
+            let session = try await BloomAPIClient.login(
                 email: xbloomEmail.trimmingCharacters(in: .whitespacesAndNewlines),
                 password: xbloomPassword
             )
@@ -198,8 +194,12 @@ final class AppModel {
 
         do {
             try RecipeEngine.validate(recipe)
-            let session = try await ensureSession()
-            let result = try await XBloomCloudClient.syncRecipe(session: session, recipe: recipe)
+            _ = try await ensureSession()
+            let result = try await BloomAPIClient.syncRecipe(
+                email: xbloomEmail.trimmingCharacters(in: .whitespacesAndNewlines),
+                password: xbloomPassword,
+                recipe: recipe
+            )
             lastPushAction = result.action
             showPushSuccess = true
             infoMessage = result.action == "updated"
@@ -248,7 +248,7 @@ final class AppModel {
         guard hasXBloomCredentials else {
             throw XBloomCloudClient.CloudError.notSignedIn
         }
-        let session = try await XBloomCloudClient.login(
+        let session = try await BloomAPIClient.login(
             email: xbloomEmail.trimmingCharacters(in: .whitespacesAndNewlines),
             password: xbloomPassword
         )
